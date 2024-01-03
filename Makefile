@@ -4,7 +4,7 @@ TIME=$(shell git log --pretty=format:"%ad" --date=format:'%Y%m%d%H%M%S' $(HASH) 
 BUILD=$(VERSION).$(HASH).$(TIME)
 BUILDTIME=$(shell date "+%Y-%m-%dT%H:%M:%S%z")
 
-GO_PACKAGE=github.com/lawyzheng/kragins
+GO_PACKAGE=$(shell grep "^module" go.mod | awk '{print $$2}')
 
 GO_BUILD_LDFLAGS = -X '$(GO_PACKAGE)/pkg/buildinfo.version=$(VERSION)' \
   				   -X '$(GO_PACKAGE)/pkg/buildinfo.build=$(BUILD)' \
