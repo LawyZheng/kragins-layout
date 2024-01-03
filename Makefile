@@ -4,9 +4,11 @@ TIME=$(shell git log --pretty=format:"%ad" --date=format:'%Y%m%d%H%M%S' $(HASH) 
 BUILD=$(VERSION).$(HASH).$(TIME)
 BUILDTIME=$(shell date "+%Y-%m-%dT%H:%M:%S%z")
 
-GO_BUILD_LDFLAGS = -X 'github.com/lawyzheng/kragins/pkg/buildinfo.version=$(VERSION)' \
-  				   -X 'github.com/lawyzheng/kragins/pkg/buildinfo.build=$(BUILD)' \
-  				   -X 'github.com/lawyzheng/kragins/pkg/buildinfo.buildTime=$(BUILDTIME)'
+GO_PACKAGE=github.com/lawyzheng/kragins
+
+GO_BUILD_LDFLAGS = -X '$(GO_PACKAGE)/pkg/buildinfo.version=$(VERSION)' \
+  				   -X '$(GO_PACKAGE)/pkg/buildinfo.build=$(BUILD)' \
+  				   -X '$(GO_PACKAGE)/pkg/buildinfo.buildTime=$(BUILDTIME)'
 GO_BUILD_FLAGS	= -ldflags "-w -s $(GO_BUILD_LDFLAGS)"
 
 OS = darwin linux windows
@@ -18,21 +20,23 @@ generate:
 
 .PHONY: build
 build: generate
-	go build -a -tags prod -o "cmd/kragins/dist/$(shell go env GOOS)/$(shell go env GOARCH)/" $(GO_BUILD_FLAGS) \
-		cmd/kragins/kragins.go;
+	go build -o "_debug/kragins/" $(GO_PACKAGE)/cmd/kragins;
 
 .PHONY: prod
 prod: generate
-	rm -rf cmd/kragins/dist
-	for arch in $(ARCH); do \
-  		for os in $(OS); do \
-			echo "release [$$os]-[$$arch] production"; \
-			GOOS=$$os \
-			GOARCH=$$arch \
-			go build -a -tags prod -o "cmd/kragins/dist/$$os/$$arch/" $(GO_BUILD_FLAGS) \
-				cmd/kragins/kragins.go; \
-			cd cmd/kragins/dist/$$os/$$arch/; \
-			zip -r kragins-$$os-$$arch-v$(VERSION).zip . ; \
-			cd -; \
+	for d in $$(go list -f '{{ if (eq .Name "main") }} {{.ImportPath}}  {{end}}' ./cmd/...); do \
+		app=$$(basename $${d}); \
+		rm -rf dist/$$app; \
+		for arch in $(ARCH); do \
+  			for os in $(OS); do \
+				echo "release [$$app] [$$os]-[$$arch] production"; \
+				GOOS=$$os \
+				GOARCH=$$arch \
+				go build -a -tags prod -o "dist/$$app/$$os/$$arch/" $(GO_BUILD_FLAGS) \
+					$(GO_PACKAGE)/cmd/$$app; \
+				cd dist/$$app/$$os/$$arch/; \
+				zip -r $$app-$$os-$$arch-v$(VERSION).zip . ; \
+				cd -; \
+			done \
 		done \
 	done
