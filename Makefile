@@ -20,7 +20,7 @@ generate:
 
 .PHONY: build
 build: generate
-	go build -o "_debug/kragins/" $(GO_PACKAGE)/cmd/kragins;
+	go build -trimpath -o "_debug/kragins/" $(GO_PACKAGE)/cmd/kragins;
 
 .PHONY: prod
 prod: generate
@@ -32,7 +32,7 @@ prod: generate
 				echo "release [$$app] [$$os]-[$$arch] production"; \
 				GOOS=$$os \
 				GOARCH=$$arch \
-				go build -a -tags prod -o "dist/$$app/$$os/$$arch/" $(GO_BUILD_FLAGS) \
+				go build -a -trimpath -tags prod -o "dist/$$app/$$os/$$arch/" $(GO_BUILD_FLAGS) \
 					$(GO_PACKAGE)/cmd/$$app; \
 				cd dist/$$app/$$os/$$arch/; \
 				zip -r $$app-$$os-$$arch-v$(VERSION).zip . ; \
