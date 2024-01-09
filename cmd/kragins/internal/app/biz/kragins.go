@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lawyzheng/kragins/cmd/kragins/internal/app/service"
 )
 
 type Model struct {
@@ -18,15 +19,15 @@ type Repo interface {
 	Get(ctx context.Context, id int) (*Model, error)
 }
 
-func NewHelloUseCase(repo Repo) *HelloUseCase {
-	return &HelloUseCase{repo: repo}
+func NewHelloUseCase(repo Repo) service.HelloUseCase {
+	return &helloUseCase{repo: repo}
 }
 
-type HelloUseCase struct {
+type helloUseCase struct {
 	repo Repo
 }
 
-func (u *HelloUseCase) GreetHandler(ctx *gin.Context) {
+func (u *helloUseCase) GreetHandler(ctx *gin.Context) {
 	model, _ := u.repo.Get(ctx, 0)
 	ctx.String(http.StatusOK, "Hello, %s", model.User)
 	ctx.Abort()

@@ -207,8 +207,8 @@ func init() {
 	}
 
 	rootCmd = &cobra.Command{
-		Use:   "kragins-demo",
-		Short: "kraings-demo is the demo for kragins",
+		Use:   "kragins",
+		Short: "kraings is the demo for kragins",
 	}
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "config.yaml", "config file (default is <executable path>/config.yaml)")
 	rootCmd.AddCommand(serveCmd)
